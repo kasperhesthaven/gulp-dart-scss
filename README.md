@@ -12,7 +12,7 @@ Gulp plugin to compile Sass using the Dart Sass compiler.
 
 ```js
 const gulp = require("gulp");
-const scss = "gulp-dart-scss";
+const scss = require("gulp-dart-scss");
 
 export function compileScss() {
   return gulp
