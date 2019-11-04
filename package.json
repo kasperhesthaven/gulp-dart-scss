@@ -1,6 +1,6 @@
 {
   "name": "gulp-dart-scss",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Gulp plugin to compile Sass using the Dart Sass compiler.",
   "author": "Kasper Hesthaven",
   "repository": "kasperhesthaven/gulp-dart-scss",

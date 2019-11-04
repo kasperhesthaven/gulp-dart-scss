@@ -16,10 +16,15 @@ module.exports = (options = {}) => {
       );
     }
 
+    // Ignore _name.scss files
+    if (path.basename(file.path).indexOf("_") === 0) {
+      return callback();
+    }
+
     (async () => {
       try {
         options.sourceMap = file.sourceMap ? file.path : false;
-        options.file = options.file || file.path;
+        options.file = file.path || options.file;
 
         const result = await dartSass.renderSync(options);
         file.contents = Buffer.from(result.css);
@@ -42,9 +47,10 @@ module.exports = (options = {}) => {
 
         setImmediate(callback, null, file);
       } catch (error) {
-        return callback(
-          new pluginError("gulp-dart-scss", error, { fileName: file.path })
+        process.stderr.write(
+          `${new pluginError("gulp-dart-scss", error.message).toString()} \r\n`
         );
+        return callback();
       }
     })();
   });
