@@ -1,6 +1,6 @@
 const through2 = require("through2");
 const pluginError = require("plugin-error");
-const dartSass = require("dart-sass");
+const dartSass = require("sass");
 const applySourceMap = require("vinyl-sourcemaps-apply");
 const path = require("path");
 
