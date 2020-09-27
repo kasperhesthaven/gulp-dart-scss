@@ -1,57 +1,66 @@
-const through2 = require("through2");
-const pluginError = require("plugin-error");
-const dartSass = require("sass");
-const applySourceMap = require("vinyl-sourcemaps-apply");
+const PluginError = require("plugin-error");
+const Transform = require("stream").Transform;
 const path = require("path");
+const applySourceMap = require("vinyl-sourcemaps-apply");
+const dartSass = require("sass");
+
+const PLUGIN_NAME = "gulp-dart-scss";
 
 module.exports = (options = {}) => {
-  return through2.obj((file, encoding, callback) => {
-    if (file.isNull()) {
-      return callback(null, file);
-    }
-
-    if (file.isStream()) {
-      return callback(
-        new pluginError("gulp-dart-scss", "Streaming not supported")
-      );
-    }
-
-    // Ignore _name.scss files
-    if (path.basename(file.path).indexOf("_") === 0) {
-      return callback();
-    }
-
-    (async () => {
-      try {
-        options.sourceMap = file.sourceMap ? file.path : false;
-        options.file = file.path || options.file;
-
-        const result = await dartSass.renderSync(options);
-        file.contents = Buffer.from(result.css);
-
-        // Replace .scss with .css
-        file.path = path.join(
-          path.dirname(file.path),
-          path.basename(file.path, path.extname(file.path)) + ".css"
-        );
-
-        // Apply sourcemap if gulp-sourcemap is present
-        if (result.map && file.sourceMap) {
-          const map = JSON.parse(result.map);
-          map.file = file.relative;
-          map.sources = map.sources.map(source =>
-            path.relative(file.base, source)
-          );
-          applySourceMap(file, map);
-        }
-
-        setImmediate(callback, null, file);
-      } catch (error) {
-        process.stderr.write(
-          `${new pluginError("gulp-dart-scss", error.message).toString()} \r\n`
-        );
-        return callback();
+  return new Transform({
+    objectMode: true,
+    transform(chunk, encoding, callback) {
+      // Return chunk if not scss extension
+      if (path.extname(chunk.path) !== ".scss") {
+        return callback(null, chunk);
       }
-    })();
+
+      // Ignore if empty or null
+      if (chunk._contents.length === 0 || chunk.isNull()) {
+        return callback(null);
+      }
+
+      // Ignore _name.scss files
+      if (path.basename(chunk.path).indexOf("_") === 0) {
+        return callback(null);
+      }
+
+      if (chunk.isBuffer()) {
+        options.sourceMap = chunk.sourceMap ? chunk.path : false;
+        options.file = chunk.path || options.file;
+
+        // Rename extension
+        chunk.path = path.join(
+          path.dirname(chunk.path),
+          path.basename(chunk.path, path.extname(chunk.path)) + ".css"
+        );
+
+        try {
+          const renderResult = dartSass.renderSync(options);
+          chunk._contents = Buffer.from(renderResult.css);
+
+          if (renderResult.map && chunk.sourceMap) {
+            const map = JSON.parse(renderResult.map);
+            map.file = chunk.relative;
+            map.sources = map.sources.map((source) =>
+              path.relative(chunk.base, source)
+            );
+            applySourceMap(chunk, map);
+          }
+
+          return callback(null, chunk);
+        } catch (error) {
+          return callback(
+            new PluginError(PLUGIN_NAME, error.message, {
+              fileName: chunk.relative,
+            })
+          );
+        }
+      } else if (chunk.isStream()) {
+        return callback(
+          new PluginError(PLUGIN_NAME, "Streaming is not supported.")
+        );
+      }
+    },
   });
 };
