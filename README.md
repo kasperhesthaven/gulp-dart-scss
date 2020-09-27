@@ -1,3 +1,5 @@
+![NPM CD](https://github.com/kasperhesthaven/gulp-dart-scss/workflows/NPM%20CD/badge.svg) ![Dependencies](https://img.shields.io/librariesio/release/npm/gulp-dart-scss) ![NPM Version](https://img.shields.io/npm/v/gulp-dart-scss)
+
 # gulp-dart-scss
 
 Gulp plugin to compile Sass (.scss) to CSS using the [Dart Sass compiler](https://github.com/sass/dart-sass).
