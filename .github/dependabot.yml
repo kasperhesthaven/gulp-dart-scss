@@ -1,10 +1,18 @@
 # NPM maintenance
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/" # `/` checks in `.github/workflows`
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
     commit-message:
-      prefix: "CI:"
+      prefix: "build:"
       include: "scope"
