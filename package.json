@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "sass": "^1.26.11",
-    "plugin-error": "^1.0.1",
+    "plugin-error": "^2.0.0",
     "vinyl-sourcemaps-apply": "^0.2.1"
   },
   "files": [
